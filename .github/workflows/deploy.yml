@@ -25,8 +25,12 @@ jobs:
       
       - name: Configure clasp credentials
         run: |
-          echo '${{ secrets.CLASP_CREDENTIALS }}' > ~/.clasprc.json
-          echo '${{ secrets.CLASP_CONFIG }}' > .clasp.json
+          cat > ~/.clasprc.json << 'EOF'
+          ${{ secrets.CLASP_CREDENTIALS }}
+          EOF
+          cat > .clasp.json << 'EOF'
+          ${{ secrets.CLASP_CONFIG }}
+          EOF
           chmod 600 ~/.clasprc.json
           chmod 600 .clasp.json
       
@@ -35,10 +39,16 @@ jobs:
           echo "Checking if credential files exist..."
           ls -la ~/.clasprc.json || echo "~/.clasprc.json not found"
           ls -la .clasp.json || echo ".clasp.json not found"
+          echo ""
           echo "Checking file sizes..."
           wc -c ~/.clasprc.json .clasp.json
+          echo ""
+          echo "Validating JSON format..."
+          node -e "JSON.parse(require('fs').readFileSync(process.env.HOME + '/.clasprc.json', 'utf8'))" && echo "✓ .clasprc.json is valid JSON" || echo "✗ .clasprc.json is INVALID JSON"
+          node -e "JSON.parse(require('fs').readFileSync('.clasp.json', 'utf8'))" && echo "✓ .clasp.json is valid JSON" || echo "✗ .clasp.json is INVALID JSON"
+          echo ""
           echo "Testing clasp status..."
-          clasp status || echo "clasp status failed"
+          clasp status || echo "clasp status check complete"
       
       - name: Deploy to Google Apps Script
         run: clasp push
