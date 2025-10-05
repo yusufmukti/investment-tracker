@@ -1,9 +1,14 @@
 # Investment Portfolio Tracker
 
+[![Deploy to Google Apps Script](https://github.com/yusufmukti/investment-tracker/actions/workflows/deploy.yml/badge.svg)](https://github.com/yusufmukti/investment-tracker/actions/workflows/deploy.yml)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![clasp](https://img.shields.io/badge/built%20with-clasp-4285f4.svg)](https://github.com/google/clasp)
+
 Automated Google Apps Script for weekly investment portfolio tracking and reporting with Git-first version control workflow.
 
 ## Table of Contents
 
+- [Demo](#demo)
 - [Overview](#overview)
 - [Quick Start](#quick-start)
 - [Features](#features)
@@ -13,6 +18,78 @@ Automated Google Apps Script for weekly investment portfolio tracking and report
 - [Configuration](#configuration)
 - [Troubleshooting](#troubleshooting)
 - [Architecture](#architecture)
+
+---
+
+## Demo
+
+### 📧 Weekly Email Report
+
+The system automatically sends HTML-formatted emails with:
+
+```
+┌─────────────────────────────────────────┐
+│ 📊 Weekly Portfolio Report              │
+├─────────────────────────────────────────┤
+│                                         │
+│ Total Value: Rp 150,000,000            │
+│ Week Change: +5.2% (↑ Rp 7,500,000)   │
+│                                         │
+│ ━━━ Asset Allocation ━━━                │
+│ 🔷 Cryptocurrency  45% Rp 67,500,000   │
+│ 📈 Stocks         30% Rp 45,000,000    │
+│ 💰 Gold           15% Rp 22,500,000    │
+│ 💵 Cash           10% Rp 15,000,000    │
+│                                         │
+│ ━━━ Top 5 Holdings ━━━                  │
+│ 1. Bitcoin (BTC)      Rp 35,000,000    │
+│ 2. Ethereum (ETH)     Rp 25,000,000    │
+│ 3. Apple Stock        Rp 20,000,000    │
+│ 4. Gold Bar          Rp 22,500,000     │
+│ 5. Emergency Fund     Rp 15,000,000    │
+└─────────────────────────────────────────┘
+```
+
+### 📅 Automated Schedule
+
+```
+Saturday 10am  →  📬 Reminder: "Update your portfolio values"
+Saturday 6pm   →  📊 Duplicate rows with new timestamp
+Sunday 8am     →  📧 Send weekly report email
+```
+
+### 🔄 Git-First Workflow
+
+```bash
+# 1. Edit code locally
+vim invest.gs
+
+# 2. Commit to Git (version control)
+git add invest.gs
+git commit -m "feat: add monthly summary"
+
+# 3. Deploy to Google Apps Script
+invest-deploy
+
+# 4. Automatic GitHub sync
+git push origin master
+# → GitHub Actions automatically deploys! ✅
+```
+
+### 📊 Spreadsheet Integration
+
+**Before (Saturday 6pm)**:
+| Timestamp | Asset ID | Asset Name | Amount | Type |
+|-----------|----------|------------|--------|------|
+| 2025-09-28 | BTC001 | Bitcoin | 35,000,000 | Crypto |
+
+**After (New row with current timestamp)**:
+| Timestamp | Asset ID | Asset Name | Amount | Type |
+|-----------|----------|------------|--------|------|
+| 2025-09-28 | BTC001 | Bitcoin | 35,000,000 | Crypto |
+| **2025-10-05** | **BTC001** | **Bitcoin** | **37,500,000** | **Crypto** |
+
+✨ *Dropdowns and formatting automatically preserved!*
 
 ---
 
