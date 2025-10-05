@@ -25,8 +25,8 @@ jobs:
       
       - name: Configure clasp credentials
         run: |
-          echo "${{ secrets.CLASP_CREDENTIALS }}" > ~/.clasprc.json
-          echo "${{ secrets.CLASP_CONFIG }}" > .clasp.json
+          printf '%s\n' '${{ secrets.CLASP_CREDENTIALS }}' > ~/.clasprc.json
+          printf '%s\n' '${{ secrets.CLASP_CONFIG }}' > .clasp.json
           chmod 600 ~/.clasprc.json
           chmod 600 .clasp.json
       
