@@ -27,8 +27,7 @@
 // ===== CONFIGURATION =====
 var CONFIG = {
   EMAIL_TO: 'yusufajarmoekti@gmail.com',
-  SPREADSHEET_ID: '', // REQUIRED: Add your Google Sheets ID here!
-                      // Get it from the URL: https://docs.google.com/spreadsheets/d/[SPREADSHEET_ID]/edit
+  SPREADSHEET_ID: '1a-sx-kSTcYVSGu2chn8sUUmoyOt8ZBYu7GnoMhl8AMg',
   SHEET_NAME: 'Sheet1', // Change to your actual sheet name
   HISTORY_SHEET_NAME: 'Portfolio_History', // Will be auto-created
   
