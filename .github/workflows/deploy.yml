@@ -29,8 +29,8 @@ jobs:
       
       - name: Configure clasp credentials
         run: |
-          printf '%s\n' '$CLASP_CREDENTIALS' > ~/.clasprc.json
-          printf '%s\n' '$CLASP_CONFIG' > .clasp.json
+          printf '%s\n' "$CLASP_CREDENTIALS" > ~/.clasprc.json
+          printf '%s\n' "$CLASP_CONFIG" > .clasp.json
           chmod 600 ~/.clasprc.json
           chmod 600 .clasp.json
       
