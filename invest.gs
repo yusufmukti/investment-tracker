@@ -106,6 +106,7 @@ function sendWeeklyPortfolioReport() {
 
 /**
  * Get current portfolio data from sheet
+ * Only uses the latest timestamp entry for each unique asset (ID + Name combination)
  */
 function getPortfolioData(sheet) {
   var lastRow = sheet.getLastRow();
@@ -113,6 +114,33 @@ function getPortfolioData(sheet) {
   
   var data = sheet.getRange(2, 1, lastRow - 1, 6).getValues();
   
+  // First pass: Find the latest timestamp for each unique asset (ID + Name)
+  var latestByAsset = {};
+  
+  data.forEach(function(row) {
+    if (!row[CONFIG.COL_AMOUNT - 1]) return; // Skip empty rows
+    
+    var assetId = row[CONFIG.COL_ASSET_ID - 1] || 'Unknown';
+    var assetName = row[CONFIG.COL_ASSET_NAME - 1] || 'Unknown';
+    var timestamp = row[CONFIG.COL_TIMESTAMP - 1];
+    
+    // Create unique key from asset_id and asset_name
+    var assetKey = assetId + '|' + assetName;
+    
+    // Convert to timestamp for comparison
+    var rowTimestamp = timestamp ? new Date(timestamp).getTime() : 0;
+    
+    // Keep only the latest entry for each unique asset
+    if (!latestByAsset[assetKey] || rowTimestamp > latestByAsset[assetKey].timestamp) {
+      latestByAsset[assetKey] = {
+        timestamp: rowTimestamp,
+        row: row,
+        assetId: assetId
+      };
+    }
+  });
+  
+  // Second pass: Build portfolio from latest entries only
   var portfolio = {
     timestamp: new Date(),
     totalValue: 0,
@@ -121,12 +149,12 @@ function getPortfolioData(sheet) {
     byId: {}
   };
   
-  data.forEach(function(row) {
-    if (!row[CONFIG.COL_AMOUNT - 1]) return; // Skip empty rows
+  Object.keys(latestByAsset).forEach(function(assetKey) {
+    var row = latestByAsset[assetKey].row;
+    var assetId = latestByAsset[assetKey].assetId;
     
     var amount = parseFloat(row[CONFIG.COL_AMOUNT - 1]) || 0;
     var assetType = row[CONFIG.COL_ASSET_TYPE - 1] || 'Unknown';
-    var assetId = row[CONFIG.COL_ASSET_ID - 1] || 'Unknown';
     
     var asset = {
       timestamp: row[CONFIG.COL_TIMESTAMP - 1],
@@ -148,7 +176,7 @@ function getPortfolioData(sheet) {
     portfolio.byType[assetType].count++;
     portfolio.byType[assetType].assets.push(asset);
     
-    // Group by ID
+    // Group by ID (can have multiple entries per ID if names differ)
     if (!portfolio.byId[assetId]) {
       portfolio.byId[assetId] = { total: 0, count: 0 };
     }
