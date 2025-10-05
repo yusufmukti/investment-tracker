@@ -27,6 +27,8 @@
 // ===== CONFIGURATION =====
 var CONFIG = {
   EMAIL_TO: 'yusufajarmoekti@gmail.com',
+  SPREADSHEET_ID: '', // REQUIRED: Add your Google Sheets ID here!
+                      // Get it from the URL: https://docs.google.com/spreadsheets/d/[SPREADSHEET_ID]/edit
   SHEET_NAME: 'Sheet1', // Change to your actual sheet name
   HISTORY_SHEET_NAME: 'Portfolio_History', // Will be auto-created
   
@@ -40,11 +42,29 @@ var CONFIG = {
 };
 
 /**
+ * Helper function to get the spreadsheet
+ * Works for both standalone and bound scripts
+ */
+function getSpreadsheet() {
+  if (CONFIG.SPREADSHEET_ID) {
+    // Standalone script - use spreadsheet ID
+    return SpreadsheetApp.openById(CONFIG.SPREADSHEET_ID);
+  } else {
+    // Bound script - use active spreadsheet
+    var ss = SpreadsheetApp.getActiveSpreadsheet();
+    if (!ss) {
+      throw new Error('SPREADSHEET_ID not configured. Please add your spreadsheet ID to CONFIG.');
+    }
+    return ss;
+  }
+}
+
+/**
  * Main function to send weekly portfolio report
  */
 function sendWeeklyPortfolioReport() {
   try {
-    var ss = SpreadsheetApp.getActiveSpreadsheet();
+    var ss = getSpreadsheet();
     var sheet = ss.getSheetByName(CONFIG.SHEET_NAME);
     
     if (!sheet) {
@@ -612,7 +632,7 @@ function testWeeklyReport() {
  */
 function sendSaturdayReminder() {
   try {
-    var ss = SpreadsheetApp.getActiveSpreadsheet();
+    var ss = getSpreadsheet();
     var sheet = ss.getSheetByName(CONFIG.SHEET_NAME);
     
     if (!sheet) {
@@ -712,7 +732,7 @@ function generateReminderEmail(current, lastUpdated) {
   
   // Quick access button
   html.push('<div style="text-align: center; margin: 25px 0;">');
-  var sheetUrl = SpreadsheetApp.getActiveSpreadsheet().getUrl();
+  var sheetUrl = getSpreadsheet().getUrl();
   html.push('<a href="' + sheetUrl + '" class="button">📊 Open Investment Tracker</a>');
   html.push('</div>');
   
@@ -780,7 +800,7 @@ function testSaturdayReminder() {
  */
 function addWeeklyTimestampRows() {
   try {
-    var ss = SpreadsheetApp.getActiveSpreadsheet();
+    var ss = getSpreadsheet();
     var sheet = ss.getSheetByName(CONFIG.SHEET_NAME);
     
     if (!sheet) {
@@ -991,4 +1011,71 @@ function addWeeklyTimestampRows() {
  */
 function testWeeklyTimestampRows() {
   addWeeklyTimestampRows();
+}
+
+/**
+ * Setup Helper - Run this FIRST to verify configuration
+ * This will check if your SPREADSHEET_ID is configured correctly
+ */
+function verifySetup() {
+  try {
+    Logger.log('=== Investment Tracker Setup Verification ===');
+    
+    // Check SPREADSHEET_ID
+    if (!CONFIG.SPREADSHEET_ID || CONFIG.SPREADSHEET_ID === '') {
+      Logger.log('❌ ERROR: SPREADSHEET_ID is not configured!');
+      Logger.log('📝 Please add your spreadsheet ID to CONFIG.SPREADSHEET_ID');
+      Logger.log('🔗 Get it from your sheet URL: https://docs.google.com/spreadsheets/d/[SPREADSHEET_ID]/edit');
+      return;
+    }
+    
+    Logger.log('✅ SPREADSHEET_ID configured: ' + CONFIG.SPREADSHEET_ID);
+    
+    // Try to open spreadsheet
+    var ss = getSpreadsheet();
+    Logger.log('✅ Successfully opened spreadsheet: ' + ss.getName());
+    Logger.log('🔗 URL: ' + ss.getUrl());
+    
+    // Check sheet exists
+    var sheet = ss.getSheetByName(CONFIG.SHEET_NAME);
+    if (!sheet) {
+      Logger.log('❌ ERROR: Sheet "' + CONFIG.SHEET_NAME + '" not found!');
+      Logger.log('📝 Available sheets: ' + ss.getSheets().map(function(s) { return s.getName(); }).join(', '));
+      return;
+    }
+    
+    Logger.log('✅ Found sheet: ' + CONFIG.SHEET_NAME);
+    Logger.log('📊 Last row: ' + sheet.getLastRow());
+    
+    // Check email
+    Logger.log('✅ Email configured: ' + CONFIG.EMAIL_TO);
+    
+    // Test email sending (optional)
+    Logger.log('\n📧 Sending test email...');
+    MailApp.sendEmail({
+      to: CONFIG.EMAIL_TO,
+      subject: '✅ Investment Tracker Setup Verified',
+      htmlBody: '<html><body>' +
+        '<h2>Setup Verification Successful!</h2>' +
+        '<p>Your Investment Tracker is configured correctly.</p>' +
+        '<ul>' +
+        '<li><strong>Spreadsheet:</strong> ' + ss.getName() + '</li>' +
+        '<li><strong>Sheet:</strong> ' + CONFIG.SHEET_NAME + '</li>' +
+        '<li><strong>Rows:</strong> ' + sheet.getLastRow() + '</li>' +
+        '<li><strong>URL:</strong> <a href="' + ss.getUrl() + '">Open Spreadsheet</a></li>' +
+        '</ul>' +
+        '<p>You can now set up your triggers!</p>' +
+        '</body></html>'
+    });
+    
+    Logger.log('✅ Test email sent successfully!');
+    Logger.log('\n🎉 All checks passed! You can now:');
+    Logger.log('   1. Set up time-based triggers');
+    Logger.log('   2. Test the main functions');
+    Logger.log('   3. Let automation run!');
+    
+  } catch (error) {
+    Logger.log('❌ ERROR: ' + error.toString());
+    Logger.log('💡 Make sure you have authorized the script and configured SPREADSHEET_ID correctly.');
+  }
 }
