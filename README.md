@@ -1,6 +1,12 @@
-# Investment Tracker - Google Apps Script
+# Investment Portfolio Tracker with clasp
 
-Automated investment portfolio tracking and reporting system using Google Apps Script.
+Automated Google Apps Script for weekly investment portfolio tracking and reporting.
+
+## 🚀 New Here? START HERE!
+
+👉 **Read [`START_HERE.md`](START_HERE.md) for a 5-minute quick start guide!**
+
+---
 
 ## Features
 
