@@ -28,11 +28,11 @@ jobs:
       
       - name: Configure clasp credentials
         run: |
-          echo "$CLASP_CREDENTIALS" > ~/.clasprc.json
-          echo "$CLASP_CONFIG" > .clasp.json
-        env:
-          CLASP_CREDENTIALS: ${{ secrets.CLASP_CREDENTIALS }}
-          CLASP_CONFIG: ${{ secrets.CLASP_CONFIG }}
+          mkdir -p ~/.config/@google
+          echo '${{ secrets.CLASP_CREDENTIALS }}' > ~/.clasprc.json
+          echo '${{ secrets.CLASP_CONFIG }}' > .clasp.json
+          ls -la ~/.clasprc.json .clasp.json
+          echo "Credentials configured successfully"
       
       - name: Deploy to Google Apps Script
         run: clasp push
