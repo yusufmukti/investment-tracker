@@ -28,11 +28,20 @@ jobs:
       
       - name: Configure clasp credentials
         run: |
-          mkdir -p ~/.config/@google
           echo '${{ secrets.CLASP_CREDENTIALS }}' > ~/.clasprc.json
           echo '${{ secrets.CLASP_CONFIG }}' > .clasp.json
-          ls -la ~/.clasprc.json .clasp.json
-          echo "Credentials configured successfully"
+          chmod 600 ~/.clasprc.json
+          chmod 600 .clasp.json
+      
+      - name: Verify credentials setup
+        run: |
+          echo "Checking if credential files exist..."
+          ls -la ~/.clasprc.json || echo "~/.clasprc.json not found"
+          ls -la .clasp.json || echo ".clasp.json not found"
+          echo "Checking file sizes..."
+          wc -c ~/.clasprc.json .clasp.json
+          echo "Testing clasp status..."
+          clasp status || echo "clasp status failed"
       
       - name: Deploy to Google Apps Script
         run: clasp push
