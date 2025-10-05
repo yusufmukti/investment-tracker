@@ -25,12 +25,8 @@ jobs:
       
       - name: Configure clasp credentials
         run: |
-          cat > ~/.clasprc.json << 'EOF'
-          ${{ secrets.CLASP_CREDENTIALS }}
-          EOF
-          cat > .clasp.json << 'EOF'
-          ${{ secrets.CLASP_CONFIG }}
-          EOF
+          echo "${{ secrets.CLASP_CREDENTIALS }}" > ~/.clasprc.json
+          echo "${{ secrets.CLASP_CONFIG }}" > .clasp.json
           chmod 600 ~/.clasprc.json
           chmod 600 .clasp.json
       
