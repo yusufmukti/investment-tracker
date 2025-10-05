@@ -49,6 +49,13 @@ jobs:
           echo "Testing clasp status..."
           clasp status || echo "clasp status check complete"
       
+      - name: Inject version information
+        run: |
+          # Update version.gs with deployment info
+          sed -i "s/AUTO_GENERATED/${{ github.sha }}/g" version.gs
+          sed -i "s/deployedAt: new Date().toISOString()/deployedAt: '$(date -u +"%Y-%m-%dT%H:%M:%SZ")'/g" version.gs
+          echo "Version info injected"
+      
       - name: Deploy to Google Apps Script
         run: |
           echo "Attempting clasp push..."
@@ -62,3 +69,5 @@ jobs:
         run: |
           echo "Deployment successful!"
           echo "View your script at: https://script.google.com"
+          echo "Commit: ${{ github.sha }}"
+          echo "Deployed at: $(date -u +"%Y-%m-%dT%H:%M:%SZ")"
