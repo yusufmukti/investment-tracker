@@ -23,23 +23,23 @@ Automated Google Apps Script for weekly investment portfolio tracking and report
 
 ## Demo
 
-### 📧 Weekly Email Report
+### Weekly Email Report
 
 The system automatically sends HTML-formatted emails with:
 
 ```
 ┌─────────────────────────────────────────┐
-│ 📊 Weekly Portfolio Report              │
+│ Weekly Portfolio Report                 │
 ├─────────────────────────────────────────┤
 │                                         │
 │ Total Value: Rp 150,000,000            │
 │ Week Change: +5.2% (↑ Rp 7,500,000)   │
 │                                         │
 │ ━━━ Asset Allocation ━━━                │
-│ 🔷 Cryptocurrency  45% Rp 67,500,000   │
-│ 📈 Stocks         30% Rp 45,000,000    │
-│ 💰 Gold           15% Rp 22,500,000    │
-│ 💵 Cash           10% Rp 15,000,000    │
+│ Cryptocurrency    45% Rp 67,500,000    │
+│ Stocks           30% Rp 45,000,000     │
+│ Gold             15% Rp 22,500,000     │
+│ Cash             10% Rp 15,000,000     │
 │                                         │
 │ ━━━ Top 5 Holdings ━━━                  │
 │ 1. Bitcoin (BTC)      Rp 35,000,000    │
@@ -50,15 +50,15 @@ The system automatically sends HTML-formatted emails with:
 └─────────────────────────────────────────┘
 ```
 
-### 📅 Automated Schedule
+### Automated Schedule
 
 ```
-Saturday 10am  →  📬 Reminder: "Update your portfolio values"
-Saturday 6pm   →  📊 Duplicate rows with new timestamp
-Sunday 8am     →  📧 Send weekly report email
+Saturday 10am  →  Reminder: "Update your portfolio values"
+Saturday 6pm   →  Duplicate rows with new timestamp
+Sunday 8am     →  Send weekly report email
 ```
 
-### 🔄 Git-First Workflow
+### Git-First Workflow
 
 ```bash
 # 1. Edit code locally
@@ -73,10 +73,10 @@ invest-deploy
 
 # 4. Automatic GitHub sync
 git push origin master
-# → GitHub Actions automatically deploys! ✅
+# → GitHub Actions automatically deploys!
 ```
 
-### 📊 Spreadsheet Integration
+### Spreadsheet Integration
 
 **Before (Saturday 6pm)**:
 | Timestamp | Asset ID | Asset Name | Amount | Type |
@@ -89,7 +89,7 @@ git push origin master
 | 2025-09-28 | BTC001 | Bitcoin | 35,000,000 | Crypto |
 | **2025-10-05** | **BTC001** | **Bitcoin** | **37,500,000** | **Crypto** |
 
-✨ *Dropdowns and formatting automatically preserved!*
+*Note: Dropdowns and formatting automatically preserved*
 
 ---
 
