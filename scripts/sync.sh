@@ -4,45 +4,45 @@
 
 set -e
 
-echo "🔄 Syncing from Google Apps Script"
-echo "===================================="
+echo "Syncing from Google Apps Script"
+echo "================================"
 echo ""
 
 # Check if we're in the right directory
 if [ ! -f "invest.gs" ]; then
-    echo "❌ Error: invest.gs not found. Run this from ~/repo/investment-tracker/"
+    echo "[ERROR] invest.gs not found. Run this from ~/repo/investment-tracker/"
     exit 1
 fi
 
 # Check for uncommitted local changes
 if ! git diff-index --quiet HEAD --; then
-    echo "⚠️  Warning: You have uncommitted local changes!"
+    echo "[WARNING] You have uncommitted local changes!"
     echo ""
     git status --short
     echo ""
     read -p "Pull anyway? This might cause conflicts (y/n): " confirm
     if [ "$confirm" != "y" ]; then
-        echo "❌ Sync cancelled"
+        echo "[INFO] Sync cancelled"
         exit 1
     fi
 fi
 
-echo "📥 Pulling from Google Apps Script..."
+echo "Pulling from Google Apps Script..."
 clasp pull
 
 if [ $? -ne 0 ]; then
-    echo "❌ Pull failed!"
+    echo "[ERROR] Pull failed!"
     exit 1
 fi
 
-echo "✅ Pulled successfully"
+echo "[OK] Pulled successfully"
 echo ""
 
 # Check if anything changed
 if git diff-index --quiet HEAD --; then
-    echo "✅ No changes detected - already in sync"
+    echo "[OK] No changes detected - already in sync"
 else
-    echo "📝 Changes detected:"
+    echo "Changes detected:"
     git status --short
     echo ""
     
@@ -61,10 +61,10 @@ else
         
         git add invest.gs appsscript.json
         git commit -m "$commit_msg"
-        echo "✅ Changes committed to Git"
+        echo "[OK] Changes committed to Git"
         echo ""
-        echo "💡 Don't forget to push to GitHub: git push origin main"
+        echo "Note: Don't forget to push to GitHub: git push origin main"
     else
-        echo "⚠️  Changes not committed"
+        echo "[INFO] Changes not committed"
     fi
 fi

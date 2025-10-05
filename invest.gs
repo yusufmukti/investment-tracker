@@ -732,7 +732,7 @@ function generateReminderEmail(current, lastUpdated) {
   // Quick access button
   html.push('<div style="text-align: center; margin: 25px 0;">');
   var sheetUrl = getSpreadsheet().getUrl();
-  html.push('<a href="' + sheetUrl + '" class="button">📊 Open Investment Tracker</a>');
+  html.push('<a href="' + sheetUrl + '" class="button">Open Investment Tracker</a>');
   html.push('</div>');
   
   // Asset breakdown preview
@@ -968,20 +968,20 @@ function addWeeklyTimestampRows() {
     // Optional: Send confirmation email
     var duplicatesRemoved = validRows.length - newRowCount;
     var emailBody = '<html><body style="font-family: Arial, sans-serif;">' +
-      '<h3 style="color: #16a34a;">✅ Weekly Portfolio Timestamp Update</h3>' +
+      '<h3 style="color: #16a34a;">Weekly Portfolio Timestamp Update</h3>' +
       '<div style="background: #f0fdf4; padding: 16px; border-left: 4px solid #16a34a; margin: 20px 0;">' +
       '<p style="margin: 0;"><strong>' + newRowCount + '</strong> unique asset' + (newRowCount > 1 ? 's' : '') + ' have been duplicated with fresh timestamps.</p>' +
       '</div>' +
       '<div style="background: #f9fafb; padding: 12px; border-radius: 4px; margin: 15px 0;">' +
       '<p style="margin: 5px 0;"><strong>📅 Timestamp:</strong> ' + Utilities.formatDate(currentTimestamp, Session.getScriptTimeZone(), 'EEEE, MMMM dd, yyyy HH:mm') + '</p>' +
-      '<p style="margin: 5px 0;"><strong>📊 Total rows added:</strong> ' + newRowCount + '</p>';
+      '<p style="margin: 5px 0;"><strong>Total rows added:</strong> ' + newRowCount + '</p>';
     
     if (duplicatesRemoved > 0) {
       emailBody += '<p style="margin: 5px 0;"><strong>🔄 Duplicates removed:</strong> ' + duplicatesRemoved + ' (kept most recent entries only)</p>';
     }
     
     emailBody += '</div>' +
-      '<p>✅ <strong>Dropdown validation preserved</strong> - Column E formatting copied successfully</p>' +
+      '<p><strong>Dropdown validation preserved</strong> - Column E formatting copied successfully</p>' +
       '<p>Please review and update the amounts in your <a href="' + ss.getUrl() + '" style="color: #3b82f6; text-decoration: none; font-weight: 600;">Investment Tracker</a> before the Sunday report.</p>' +
       '<hr style="border: none; border-top: 1px solid #e5e7eb; margin: 25px 0;">' +
       '<p style="color: #666; font-size: 11px; line-height: 1.5;">This is an automated update from your Investment Tracker.<br>Unique assets identified by Asset ID + Asset Name combination (Columns B + C).</p>' +
@@ -989,7 +989,7 @@ function addWeeklyTimestampRows() {
     
     MailApp.sendEmail({
       to: CONFIG.EMAIL_TO,
-      subject: '✅ Portfolio Rows Auto-Updated (' + newRowCount + ' assets)',
+      subject: 'Portfolio Rows Auto-Updated (' + newRowCount + ' assets)',
       htmlBody: emailBody
     });
     
@@ -999,7 +999,7 @@ function addWeeklyTimestampRows() {
     // Send error notification
     MailApp.sendEmail({
       to: CONFIG.EMAIL_TO,
-      subject: '❌ Portfolio Auto-Update Failed',
+      subject: 'Portfolio Auto-Update Failed',
       body: 'Failed to add weekly timestamp rows.\n\nError: ' + error.toString()
     });
   }
@@ -1022,38 +1022,38 @@ function verifySetup() {
     
     // Check SPREADSHEET_ID
     if (!CONFIG.SPREADSHEET_ID || CONFIG.SPREADSHEET_ID === '') {
-      Logger.log('❌ ERROR: SPREADSHEET_ID is not configured!');
-      Logger.log('📝 Please add your spreadsheet ID to CONFIG.SPREADSHEET_ID');
+      Logger.log('ERROR: SPREADSHEET_ID is not configured!');
+      Logger.log('Please add your spreadsheet ID to CONFIG.SPREADSHEET_ID');
       Logger.log('🔗 Get it from your sheet URL: https://docs.google.com/spreadsheets/d/[SPREADSHEET_ID]/edit');
       return;
     }
     
-    Logger.log('✅ SPREADSHEET_ID configured: ' + CONFIG.SPREADSHEET_ID);
+    Logger.log('SPREADSHEET_ID configured: ' + CONFIG.SPREADSHEET_ID);
     
     // Try to open spreadsheet
     var ss = getSpreadsheet();
-    Logger.log('✅ Successfully opened spreadsheet: ' + ss.getName());
+    Logger.log('Successfully opened spreadsheet: ' + ss.getName());
     Logger.log('🔗 URL: ' + ss.getUrl());
     
     // Check sheet exists
     var sheet = ss.getSheetByName(CONFIG.SHEET_NAME);
     if (!sheet) {
-      Logger.log('❌ ERROR: Sheet "' + CONFIG.SHEET_NAME + '" not found!');
-      Logger.log('📝 Available sheets: ' + ss.getSheets().map(function(s) { return s.getName(); }).join(', '));
+      Logger.log('ERROR: Sheet "' + CONFIG.SHEET_NAME + '" not found!');
+      Logger.log('Available sheets: ' + ss.getSheets().map(function(s) { return s.getName(); }).join(', '));
       return;
     }
     
-    Logger.log('✅ Found sheet: ' + CONFIG.SHEET_NAME);
-    Logger.log('📊 Last row: ' + sheet.getLastRow());
+    Logger.log('Found sheet: ' + CONFIG.SHEET_NAME);
+    Logger.log('Last row: ' + sheet.getLastRow());
     
     // Check email
-    Logger.log('✅ Email configured: ' + CONFIG.EMAIL_TO);
+    Logger.log('Email configured: ' + CONFIG.EMAIL_TO);
     
     // Test email sending (optional)
     Logger.log('\n📧 Sending test email...');
     MailApp.sendEmail({
       to: CONFIG.EMAIL_TO,
-      subject: '✅ Investment Tracker Setup Verified',
+      subject: 'Investment Tracker Setup Verified',
       htmlBody: '<html><body>' +
         '<h2>Setup Verification Successful!</h2>' +
         '<p>Your Investment Tracker is configured correctly.</p>' +
@@ -1067,14 +1067,14 @@ function verifySetup() {
         '</body></html>'
     });
     
-    Logger.log('✅ Test email sent successfully!');
+    Logger.log('Test email sent successfully!');
     Logger.log('\n🎉 All checks passed! You can now:');
     Logger.log('   1. Set up time-based triggers');
     Logger.log('   2. Test the main functions');
     Logger.log('   3. Let automation run!');
     
   } catch (error) {
-    Logger.log('❌ ERROR: ' + error.toString());
-    Logger.log('💡 Make sure you have authorized the script and configured SPREADSHEET_ID correctly.');
+    Logger.log('ERROR: ' + error.toString());
+    Logger.log('Make sure you have authorized the script and configured SPREADSHEET_ID correctly.');
   }
 }
