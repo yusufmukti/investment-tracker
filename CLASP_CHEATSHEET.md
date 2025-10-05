@@ -1,6 +1,29 @@
 # clasp Cheat Sheet - Investment Tracker
 
-## Daily Workflow
+## 🔥 Git-First Workflow (Recommended)
+
+### Quick Deploy (Commit + Push in one command)
+```bash
+cd ~/repo/investment-tracker
+./deploy.sh
+# This will:
+# 1. Commit your changes to Git
+# 2. Deploy to Google Apps Script
+# 3. Show next steps
+```
+
+### If You Edited in Browser
+```bash
+./sync.sh
+# This will:
+# 1. Pull from Google Apps Script
+# 2. Show what changed
+# 3. Commit to Git
+```
+
+---
+
+## Daily Workflow (Step by Step)
 
 ### 1. Edit Files Locally
 ```bash
@@ -8,14 +31,22 @@ cd ~/repo/investment-tracker
 code invest.gs  # or any editor
 ```
 
-### 2. Push Changes to Google Apps Script
+### 2. Deploy (Git-First)
 ```bash
+./deploy.sh
+# Or manually:
+git add invest.gs
+git commit -m "Your change description"
 clasp push
 ```
 
-### 3. Pull Remote Changes (if edited in browser)
+### 3. If Edited in Browser
 ```bash
+./sync.sh
+# Or manually:
 clasp pull
+git add invest.gs
+git commit -m "Synced from browser"
 ```
 
 ### 4. Open in Browser
@@ -26,6 +57,11 @@ clasp open-script
 ### 5. View Logs
 ```bash
 clasp logs
+```
+
+### 6. Push to GitHub
+```bash
+git push origin main
 ```
 
 ---
