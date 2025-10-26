@@ -198,18 +198,31 @@ function savePortfolioSnapshot(ss, portfolio) {
   // Create history sheet if it doesn't exist
   if (!historySheet) {
     historySheet = ss.insertSheet(CONFIG.HISTORY_SHEET_NAME);
-    historySheet.getRange(1, 1, 1, 5).setValues([['Timestamp', 'Total Value', 'Asset Count', 'Breakdown', 'Asset Details']]);
-    historySheet.getRange(1, 1, 1, 5).setFontWeight('bold');
+    historySheet.getRange(1, 1, 1, 6).setValues([['Timestamp', 'Total Value', 'Asset Count', 'Breakdown', 'Asset Details', 'Asset Names']]);
+    historySheet.getRange(1, 1, 1, 6).setFontWeight('bold');
   }
   
   var breakdown = JSON.stringify(portfolio.byType);
   var assetDetails = JSON.stringify(portfolio.byId);
+  
+  // Create asset name mapping: asset_name -> {amount, type, id}
+  var byName = {};
+  portfolio.assets.forEach(function(asset) {
+    byName[asset.name] = {
+      amount: asset.amount,
+      type: asset.type,
+      id: asset.id
+    };
+  });
+  var assetNames = JSON.stringify(byName);
+  
   historySheet.appendRow([
     new Date(),
     portfolio.totalValue,
     portfolio.assets.length,
     breakdown,
-    assetDetails
+    assetDetails,
+    assetNames
   ]);
 }
 
@@ -224,13 +237,15 @@ function getPreviousWeekData(ss) {
   if (lastRow < 3) return null; // Need at least 2 data rows
   
   // Get second to last row (previous week)
-  var data = historySheet.getRange(lastRow - 1, 1, 1, 4).getValues()[0];
+  var numCols = historySheet.getLastColumn();
+  var data = historySheet.getRange(lastRow - 1, 1, 1, numCols).getValues()[0];
   
   return {
     timestamp: data[0],
     totalValue: data[1],
     assetCount: data[2],
-    byType: JSON.parse(data[3])
+    byType: JSON.parse(data[3]),
+    byName: data[5] ? JSON.parse(data[5]) : null // Asset names (may not exist in old data)
   };
 }
 
@@ -403,6 +418,163 @@ function generateEmailReport(current, previous, ss) {
   html.push('</div>');
   
   html.push('<hr class="divider">');
+  
+  // Changes by Asset Name
+  if (previous && previous.byName) {
+    html.push('<h3>Changes by Asset</h3>');
+    html.push('<p class="info-text">Individual asset changes compared to last week</p>');
+    
+    // Build comparison data
+    var assetChanges = [];
+    
+    // Check current assets
+    current.assets.forEach(function(asset) {
+      var prevData = previous.byName[asset.name];
+      if (prevData) {
+        var change = asset.amount - prevData.amount;
+        var changePercent = (change / prevData.amount) * 100;
+        assetChanges.push({
+          name: asset.name,
+          type: asset.type,
+          currentAmount: asset.amount,
+          previousAmount: prevData.amount,
+          change: change,
+          changePercent: changePercent,
+          status: 'existing'
+        });
+      } else {
+        // New asset
+        assetChanges.push({
+          name: asset.name,
+          type: asset.type,
+          currentAmount: asset.amount,
+          previousAmount: 0,
+          change: asset.amount,
+          changePercent: 100,
+          status: 'new'
+        });
+      }
+    });
+    
+    // Check for removed assets
+    for (var prevAssetName in previous.byName) {
+      var stillExists = current.assets.some(function(a) { return a.name === prevAssetName; });
+      if (!stillExists) {
+        var prevData = previous.byName[prevAssetName];
+        assetChanges.push({
+          name: prevAssetName,
+          type: prevData.type,
+          currentAmount: 0,
+          previousAmount: prevData.amount,
+          change: -prevData.amount,
+          changePercent: -100,
+          status: 'removed'
+        });
+      }
+    }
+    
+    // Sort by absolute change (largest changes first)
+    assetChanges.sort(function(a, b) {
+      return Math.abs(b.change) - Math.abs(a.change);
+    });
+    
+    // Show summary of significant changes
+    var significantChanges = assetChanges.filter(function(a) { 
+      return Math.abs(a.change) > 0 && a.status === 'existing';
+    });
+    var newAssets = assetChanges.filter(function(a) { return a.status === 'new'; });
+    var removedAssets = assetChanges.filter(function(a) { return a.status === 'removed'; });
+    
+    if (significantChanges.length === 0 && newAssets.length === 0 && removedAssets.length === 0) {
+      html.push('<div class="section-summary">');
+      html.push('No changes detected in individual assets this week.');
+      html.push('</div>');
+    } else {
+      html.push('<div class="section-summary">');
+      html.push('<strong>' + significantChanges.length + '</strong> asset' + (significantChanges.length !== 1 ? 's' : '') + ' changed');
+      if (newAssets.length > 0) html.push(' • <strong>' + newAssets.length + '</strong> new');
+      if (removedAssets.length > 0) html.push(' • <strong>' + removedAssets.length + '</strong> removed');
+      html.push('</div>');
+      
+      // Table with changes
+      html.push('<table>');
+      html.push('<tr><th>Asset Name</th><th>Type</th><th>Previous Value</th><th>Current Value</th><th>Change</th><th>Change %</th></tr>');
+      
+      assetChanges.forEach(function(asset) {
+        if (asset.change === 0 && asset.status === 'existing') return; // Skip unchanged assets
+        
+        var changeClass = asset.change > 0 ? 'positive' : (asset.change < 0 ? 'negative' : 'neutral');
+        var rowClass = asset.change > 0 ? 'positive-bg' : (asset.change < 0 ? 'negative-bg' : '');
+        var changeSymbol = asset.change > 0 ? '+' : '';
+        
+        html.push('<tr class="' + rowClass + '">');
+        
+        // Asset name with status badge
+        var statusBadge = '';
+        if (asset.status === 'new') {
+          statusBadge = ' <span style="background: #16a34a; color: white; padding: 2px 6px; border-radius: 3px; font-size: 10px; font-weight: 600;">NEW</span>';
+        } else if (asset.status === 'removed') {
+          statusBadge = ' <span style="background: #dc2626; color: white; padding: 2px 6px; border-radius: 3px; font-size: 10px; font-weight: 600;">REMOVED</span>';
+        }
+        html.push('<td><strong>' + asset.name + '</strong>' + statusBadge + '</td>');
+        
+        html.push('<td>' + asset.type + '</td>');
+        
+        // Previous value
+        if (asset.status === 'new') {
+          html.push('<td style="color: #999;">-</td>');
+        } else {
+          html.push('<td>Rp ' + formatCompactNumber(asset.previousAmount) + '<br><span style="font-size: 10px; color: #999;">' + formatNumber(asset.previousAmount) + '</span></td>');
+        }
+        
+        // Current value
+        if (asset.status === 'removed') {
+          html.push('<td style="color: #999;">-</td>');
+        } else {
+          html.push('<td>Rp ' + formatCompactNumber(asset.currentAmount) + '<br><span style="font-size: 10px; color: #999;">' + formatNumber(asset.currentAmount) + '</span></td>');
+        }
+        
+        // Change amount
+        html.push('<td class="' + changeClass + '"><strong>' + changeSymbol + 'Rp ' + formatCompactNumber(Math.abs(asset.change)) + '</strong><br><span style="font-size: 10px;">' + changeSymbol + formatNumber(Math.abs(asset.change)) + '</span></td>');
+        
+        // Change percent
+        if (asset.status === 'new') {
+          html.push('<td class="' + changeClass + '"><strong>NEW</strong></td>');
+        } else if (asset.status === 'removed') {
+          html.push('<td class="' + changeClass + '"><strong>-100%</strong></td>');
+        } else {
+          html.push('<td class="' + changeClass + '"><strong>' + changeSymbol + asset.changePercent.toFixed(1) + '%</strong></td>');
+        }
+        
+        html.push('</tr>');
+      });
+      
+      html.push('</table>');
+      
+      // Highlight top movers
+      if (significantChanges.length > 0) {
+        var topGainer = significantChanges.reduce(function(max, item) {
+          return item.change > max.change ? item : max;
+        }, significantChanges[0]);
+        
+        var topLoser = significantChanges.reduce(function(min, item) {
+          return item.change < min.change ? item : min;
+        }, significantChanges[0]);
+        
+        html.push('<div class="highlight-box">');
+        html.push('<strong>Notable Movers:</strong><br>');
+        if (topGainer.change > 0) {
+          html.push('🔼 <strong>Top Gainer:</strong> ' + topGainer.name + ' <span class="positive">(+Rp ' + formatNumber(topGainer.change) + ', +' + topGainer.changePercent.toFixed(1) + '%)</span>');
+        }
+        if (topLoser.change < 0) {
+          html.push('<br>🔽 <strong>Top Loser:</strong> ' + topLoser.name + ' <span class="negative">(' + formatNumber(topLoser.change) + ', ' + topLoser.changePercent.toFixed(1) + '%)</span>');
+        }
+        html.push('</div>');
+      }
+    }
+    
+    html.push('<hr class="divider">');
+  }
   
   // Top 5 holdings
   html.push('<h3>Top Holdings</h3>');
